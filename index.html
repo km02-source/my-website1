@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>보물찾기 플로깅! With Ku쿠다스!</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsPDF CDN for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Inter 폰트 적용 */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4; /* 연한 녹색 배경 */
+        }
+        /* 커스텀 스크롤바 (선택 사항) */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0fdf4;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6ee7b7; /* 에메랄드 300 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #34d399; /* 에메랄드 500 */
+        }
+        /* 수료증 이미지 컨테이너 스타일 */
+        .certificate-image-container {
+            position: relative;
+            width: 100%;
+            /* 이미지 원본 비율 (높이/너비 * 100)을 사용하여 이미지 컨테이너의 높이를 동적으로 설정 */
+            /* 707 / 500 * 100% = 141.4% (예시 이미지의 비율) */
+            padding-bottom: 141.4%; 
+            overflow: hidden;
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+        }
+        .certificate-image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 이미지가 잘리지 않고 비율 유지 */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-2xl w-full border border-green-200">
+        <h1 class="text-4xl font-extrabold text-center text-green-700 mb-8">
+            <span class="inline-block transform -rotate-6 text-green-500">🌍</span> 보물찾기 플로깅! With Ku쿠다스!
+        </h1>
+
+        <!-- 플로깅 설명 섹션 -->
+        <div id="explanation-section" class="space-y-6 text-gray-700">
+            <h2 class="text-2xl font-bold text-green-600 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                보물찾기 플로깅 안내
+            </h2>
+            <p class="leading-relaxed">
+                안녕하세요! 시민과 함께하는 환경 실천 팀, Ku쿠다스입니다. 저희는 건국대학교 학생들로 구성된 팀으로 자원의 선순환과 지속 가능한 소비문화를 실천하고자 노력하고 있습니다.
+            </p>
+            <p class="leading-relaxed">
+                이번 활동은 시민 여러분의 자발적인 참여를 통해 한강공원의 환경 보전에 대한 인식을 높이고, 즐겁게 걷고 쓰레기를 줍는 '보물찾기 플로깅' 프로그램을 통해 함께 깨끗한 한강을 만들어가고자 합니다.
+            </p>
+            <p class="leading-relaxed">
+                지도를 따라 보물 스팟을 방문하고, 퀴즈도 풀며 미션을 완료해보세요!
+            </p>
+            <p class="leading-relaxed">
+                환경도 지키고 선물도 받는 뜻깊은 시간, 우리 함께 걸어요 :)
+            </p>
+
+            <div class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                <h3 class="text-xl font-semibold text-green-700 mb-3">이벤트 상세 정보</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                    <li><span class="font-bold">시작 위치:</span> 여의나루역 2번 출구, 이벤트광장 (IBEEDILLU)</li>
+                    <li><span class="font-bold">진행 시간:</span> 오전 10시 ~ 12시까지 진행하며, 플로깅 소요시간은 20~30분 정도입니다.</li>
+                    <li><span class="font-bold">진행 날짜:</span> 2025년 7월 12일, 7월 19일, 7월 20일</li>
+                </ul>
+            </div>
+
+            <div class="flex justify-center mt-8">
+                <!-- Main event poster image -->
+                <img src="uploaded:KakaoTalk_20250708_193246394.jpg-f31082b4-5dc5-4a03-ba9ceb72cf3a" alt="귀여운 플로깅 캐릭터 이미지" class="rounded-lg shadow-md max-w-full h-auto">
+            </div>
+
+            <div class="flex justify-center mt-8">
+                <button id="start-mission-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300">
+                    미션 시작하기 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- 코스 선택 섹션 -->
+        <div id="course-selection-section" class="hidden space-y-6 text-gray-700 text-center">
+            <h2 class="text-2xl font-bold text-indigo-600 mb-6 flex items-center justify-center">
+                <svg class="w-6 h-6 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
+                코스를 선택해주세요
+            </h2>
+            <p class="leading-relaxed mb-8">
+                오늘의 플로깅 코스를 선택해주세요. 각 코스마다 다른 보물 스팟이 기다리고 있습니다!
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-6">
+                <button id="select-course-a-btn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                    A 코스 선택
+                </button>
+                <button id="select-course-b-btn" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300">
+                    B 코스 선택
+                </button>
+            </div>
+        </div>
+
+        <!-- 미션 수행 섹션 -->
+        <div id="mission-section" class="hidden space-y-6 text-gray-700">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.92 8.725c-.783-.57-.381-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                미션 수행하기: 보물찾기 코스 안내
+            </h2>
+            <p class="leading-relaxed">
+                자신이 찾을 보물 스팟을 방문하고, 퀴즈도 풀며 미션을 완료해 보세요!
+                환경도 지키고 나눔도 얻는 뜻깊은 시간, 우리 함께 걸어 보아요 :)
+            </p>
+            <p class="leading-relaxed font-semibold text-blue-800">
+                오늘의 코스는 <span id="assigned-course-name" class="text-indigo-700"></span> 입니다. 지도를 따라 미션을 수행해주세요!
+            </p>
+            <p class="leading-relaxed font-semibold text-green-700 mt-4">
+                지도를 보고 걸으시면서, 눈에 보이는 쓰레기가 있다면 주우면서 이동해주세요 :)
+            </p>
+
+            <!-- 랜덤으로 배정될 코스 정보가 표시될 곳 -->
+            <div id="dynamic-course-info" class="flex-1 bg-blue-50 p-4 rounded-lg border border-blue-200 mt-6">
+                <h3 id="course-title" class="text-xl font-semibold text-blue-700 mb-3"></h3>
+                <img id="course-image" src="" alt="코스 안내 지도" class="rounded-lg shadow-md max-w-full h-auto mb-4" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/333333?text=이미지+로드+실패';">
+                <ul id="course-spots" class="list-disc list-inside text-gray-700">
+                    <!-- 코스 스팟 목록이 여기에 동적으로 추가됩니다 -->
+                </ul>
+            </div>
+
+            <!-- 쓰레기 몬스터 퇴치 미션 -->
+            <div class="mt-8 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <h3 class="text-xl font-bold text-yellow-700 mb-3 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008.007 8.395L9.9 10.288l-1.893 1.893a1 1 0 101.414 1.414L11.314 11.7l1.893 1.893a1 1 0 001.414-1.414l-1.893-1.893 1.893-1.893a1 1 0 00-1.414-1.414L10 9.172l-1.893-1.893z" clip-rule="evenodd"></path></svg>
+                    ✨ 쓰레기 몬스터 퇴치 미션 ✨
+                </h3>
+                <p class="leading-relaxed mb-2">
+                    보물스팟에서 쓰레기봉투 들고 몬스터 퇴치 포즈로 사진 찍기 미션입니다!
+                </p>
+                <p class="leading-relaxed font-semibold text-yellow-800">
+                    ✨ 포즈 미션 - 쓰레기 몬스터를 이겼다! 포즈 ✨
+                </p>
+                <p class="leading-relaxed">
+                    미션 성공을 위해 다음 지시사항을 따라주세요: 보물스팟에서 쓰레기봉투를 들고, 강력한 몬스터 퇴치 포즈로 멋진 인증샷을 찍어주세요!
+                </p>
+                <div class="mt-4 text-center">
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSckzVDeZzU-IMj93Y8rfE9BgiBdOZxqCR_SW87eVsBNWFnRnA/viewform" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-bold">
+                        위 링크에 들어가서 미션을 수행해주세요 !
+                    </a>
+                </div>
+            </div>
+            <!-- 쓰레기 몬스터 퇴치 미션 끝 -->
+
+            <!-- 누가누가 많이 담았나 ! 미션 추가 -->
+            <div class="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
+                <h3 class="text-xl font-bold text-green-700 mb-3 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                    ✨ 누가누가 많이 담았나 ! 미션 ✨
+                </h3>
+                <p class="leading-relaxed mb-2">
+                    오늘 내가 찾은 쓰레기들과 쓰레기 봉투를 자랑해주세요!
+                </p>
+                <p class="leading-relaxed font-semibold text-green-800">
+                    열심히, 정성스럽게, 많이 담은 사람에게 '지구지킴이 수료증'이 주어집니다!
+                </p>
+                <p class="leading-relaxed mt-4 font-bold">
+                    미션 수행 방법:
+                </p>
+                <ul class="list-decimal list-inside space-y-1 text-gray-700">
+                    <li>보물 스팟에서 내가 주운 쓰레기들과 쓰레기 봉투를 자랑하며 인증샷!</li>
+                    <li>"내가 주운 쓰레기 소개하기" 멘트 추가! (예: “이 플라스틱 컵은 무려 벤치 밑에 숨어 있었답니다!”)</li>
+                </ul>
+                <div class="mt-4 text-center">
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfghWmp75uHnXppOUR9t19dS4rrcuAYfWWcK6qbGB7S2OBULA/viewform" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-bold">
+                        위 링크에 들어가서 미션을 수행해주세요 !
+                    </a>
+                </div>
+            </div>
+            <!-- 누가누가 많이 담았나 ! 미션 끝 -->
+
+            <!-- 마지막 미션 멘트 추가 -->
+            <div class="mt-8 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <h3 class="text-xl font-bold text-purple-700 mb-3 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                    ✨ 드디어 마지막 미션입니다 !! ✨
+                </h3>
+                <p class="leading-relaxed">
+                    마지막 미션은 마지막 스팟에 위치한 QR을 찍고 퀴즈를 푸시면 완료입니다 !!
+                </p>
+            </div>
+            <!-- 마지막 퀴즈 미션 완료 후 멘트 추가 -->
+            <p class="leading-relaxed font-semibold text-green-700 mt-6 text-center">
+                마지막 퀴즈 미션까지 완료 후 아래 이름 및 참여 날짜를 선택하시면 수료증이 발급됩니다~!
+            </p>
+
+            <p class="leading-relaxed mt-6">
+                모든 미션을 완료하셨다면 아래에 이름과 참여 날짜를 입력하고 버튼을 눌러주세요.
+            </p>
+            <div class="mb-4">
+                <label for="user-name" class="block text-gray-700 text-sm font-bold mb-2">이름을 입력해주세요:</label>
+                <input type="text" id="user-name" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="지구지킴이">
+            </div>
+            <div class="mb-4">
+                <label for="plogging-date" class="block text-gray-700 text-sm font-bold mb-2">참여 날짜를 선택해주세요:</label>
+                <select id="plogging-date" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option value="">날짜 선택</option>
+                    <option value="2025-07-12">2025년 7월 12일</option>
+                    <option value="2025-07-19">2025년 7월 19일</option>
+                    <option value="2025-07-20">2025년 7월 20일</option>
+                </select>
+            </div>
+            <div class="flex justify-center mt-8">
+                <button id="complete-mission-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                    미션 완료! 🎉
+                </button>
+            </div>
+        </div>
+
+        <!-- 수료증 섹션 (초기에는 숨김) -->
+        <div id="certificate-section" class="hidden space-y-6 text-gray-700 text-center">
+            <h2 class="text-3xl font-bold text-purple-600 mb-6 flex items-center justify-center">
+                <svg class="w-8 h-8 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M12.452 4.197A.75.75 0 0113 4.5V16.5a.75.75 0 01-1.5 0V5.07L7.5 8.28V16.5a.75.75 0 01-1.5 0V4.5a.75.75 0 01.548-.797l5.25-1.75a.75.75 0 01.652.197z" clip-rule="evenodd"></path></svg>
+                수료증
+            </h2>
+            <div class="certificate-image-container">
+                <!-- 수료증 이미지가 여기에 동적으로 로드됩니다 -->
+                <img id="certificate-image" src="" alt="수료증 이미지" onerror="this.onerror=null;this.src='https://placehold.co/600x800/cccccc/333333?text=이미지+로드+실패';">
+            </div>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+                <button id="download-certificate-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300">
+                    수료증 다운로드 (PDF)
+                </button>
+                <button id="reset-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-200">
+                    처음으로 돌아가기
+                </button>
+            </div>
+        </div>
+
+        <!-- 메시지 박스 (알림용) -->
+        <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full">
+                <p id="message-text" class="text-lg font-semibold text-gray-800 mb-4"></p>
+                <button id="message-ok-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-5 rounded-full transition duration-300 ease-in-out">확인</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM 요소 가져오기
+        const explanationSection = document.getElementById('explanation-section');
+        const courseSelectionSection = document.getElementById('course-selection-section');
+        const missionSection = document.getElementById('mission-section');
+        const certificateSection = document.getElementById('certificate-section');
+        const startMissionBtn = document.getElementById('start-mission-btn');
+        const selectCourseABtn = document.getElementById('select-course-a-btn');
+        const selectCourseBBtn = document.getElementById('select-course-b-btn'); // Corrected ID
+        const completeMissionBtn = document.getElementById('complete-mission-btn');
+        const userNameInput = document.getElementById('user-name');
+        const ploggingDateSelect = document.getElementById('plogging-date');
+        const certificateImage = document.getElementById('certificate-image');
+        const downloadCertificateBtn = document.getElementById('download-certificate-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const messageOkBtn = document.getElementById('message-ok-btn');
+
+        // 동적으로 코스 정보를 표시할 요소들
+        const assignedCourseName = document.getElementById('assigned-course-name');
+        const courseTitle = document.getElementById('course-title');
+        const courseImage = document.getElementById('course-image');
+        const courseSpots = document.getElementById('course-spots');
+
+        // 코스 데이터 정의
+        const courses = {
+            'A': {
+                name: 'A 코스',
+                image: 'uploaded:KakaoTalk_20250704_000923647.jpg-8193afb4-8e94-446a-817a-a4e00be00553',
+                spots: [
+                    '① 이벤트광장 (Event Plaza)',
+                    '② 물빛무대 (Mulbit Stage)',
+                    '③ 배달존 2 (Delivery Zone 2)'
+                ]
+            },
+            'B': {
+                name: 'B 코스',
+                image: 'uploaded:KakaoTalk_20250704_000923647_01.jpg-f4756ca8-d961-4163-9ca0-89884c2323b0',
+                spots: [
+                    '① 이벤트광장 (Event Plaza)',
+                    '② 어린이놀이터 (Children\'s Playground)',
+                    '③ 선착장 앞 잔디마당 (Lawn in Front of the Dock)',
+                    '④ 배달존 1 (Delivery Zone 1)'
+                ]
+            }
+        };
+
+        // 날짜별 수료증 이미지 맵핑
+        const certificateImages = {
+            '2025-07-12': 'uploaded:KakaoTalk_20250703_234955857_01.jpg-06e89415-414e-4e40-b170-44a19075bf38',
+            '2025-07-19': 'uploaded:KakaoTalk_20250703_234955857.jpg-b6bd243b-413f-4e19-88ac-8ec95cf0b8cf',
+            '2025-07-20': 'uploaded:KakaoTalk_20250703_234955857_02.jpg-a2f0fe10-69cb-4893-b250-0b73654a79d6'
+        };
+
+        // 메시지 박스 표시 함수
+        function showMessageBox(message) {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden');
+        }
+
+        // 메시지 박스 숨김 함수
+        messageOkBtn.addEventListener('click', () => {
+            messageBox.classList.add('hidden');
+        });
+
+        // 특정 코스 배정 및 표시 함수 (랜덤 대신 선택된 코스를 받음)
+        function assignAndDisplayCourse(selectedCourseKey) {
+            const assignedCourse = courses[selectedCourseKey];
+
+            assignedCourseName.textContent = assignedCourse.name;
+            courseTitle.textContent = assignedCourse.name + " 안내";
+            courseImage.src = assignedCourse.image;
+            courseImage.alt = assignedCourse.name + " 안내 지도";
+
+            // 기존 스팟 목록 초기화
+            courseSpots.innerHTML = '';
+            // 새로운 스팟 목록 추가
+            assignedCourse.spots.forEach(spot => {
+                const li = document.createElement('li');
+                li.textContent = spot;
+                courseSpots.appendChild(li);
+            });
+        }
+
+        // '미션 시작하기' 버튼 클릭 이벤트: 코스 선택 섹션으로 이동
+        startMissionBtn.addEventListener('click', () => {
+            explanationSection.classList.add('hidden');
+            courseSelectionSection.classList.remove('hidden'); // 코스 선택 섹션 표시
+        });
+
+        // A 코스 선택 버튼 클릭 이벤트
+        selectCourseABtn.addEventListener('click', () => {
+            courseSelectionSection.classList.add('hidden');
+            missionSection.classList.remove('hidden');
+            assignAndDisplayCourse('A'); // A 코스 배정 및 표시
+            userNameInput.focus();
+        });
+
+        // B 코스 선택 버튼 클릭 이벤트
+        selectCourseBBtn.addEventListener('click', () => {
+            courseSelectionSection.classList.add('hidden');
+            missionSection.classList.remove('hidden');
+            assignAndDisplayCourse('B'); // B 코스 배정 및 표시
+            userNameInput.focus();
+        });
+
+        // '미션 완료!' 버튼 클릭 이벤트
+        completeMissionBtn.addEventListener('click', () => {
+            const name = userNameInput.value.trim();
+            const selectedDate = ploggingDateSelect.value;
+
+            if (name === "") {
+                showMessageBox("이름을 입력해주세요!");
+                return;
+            }
+            if (selectedDate === "") {
+                showMessageBox("참여 날짜를 선택해주세요!");
+                return;
+            }
+
+            // 선택된 날짜에 맞는 수료증 이미지 설정
+            const certImageUrl = certificateImages[selectedDate];
+            if (certImageUrl) {
+                certificateImage.src = certImageUrl;
+                certificateImage.alt = `${selectedDate} 수료증 이미지`;
+            } else {
+                // 기본 이미지 또는 오류 처리
+                certificateImage.src = 'https://placehold.co/600x800/cccccc/333333?text=수료증+이미지+없음';
+                certificateImage.alt = '수료증 이미지를 찾을 수 없습니다.';
+            }
+
+            missionSection.classList.add('hidden');
+            certificateSection.classList.remove('hidden');
+            showMessageBox("축하합니다! 미션을 성공적으로 완료하셨습니다!");
+        });
+
+        // '수료증 다운로드' 버튼 클릭 이벤트 (PDF 생성)
+        downloadCertificateBtn.addEventListener('click', async () => {
+            const certImageElement = document.getElementById('certificate-image');
+            const userName = userNameInput.value.trim();
+            const selectedDate = ploggingDateSelect.value;
+
+            if (!certImageElement || !certImageElement.src || certImageElement.src.includes('placehold.co')) {
+                showMessageBox("수료증 이미지를 찾을 수 없습니다. 다시 시도해주세요.");
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4'); // 'p' for portrait, 'mm' for millimeters, 'a4' for A4 size
+
+                // 이미지 URL에서 Blob 데이터를 가져옴
+                const response = await fetch(certImageElement.src);
+                const blob = await response.blob();
+
+                // Blob 데이터를 Base64로 변환
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+
+                reader.onload = function() {
+                    const base64data = reader.result; // Base64 데이터
+
+                    // 이미지의 실제 크기를 가져와 비율 계산
+                    const img = new Image();
+                    img.onload = () => {
+                        const imgOriginalWidth = img.naturalWidth;
+                        const imgOriginalHeight = img.naturalHeight;
+
+                        // PDF A4 크기 (mm)
+                        const pdfWidth = doc.internal.pageSize.getWidth();
+                        const pdfHeight = doc.internal.pageSize.getHeight();
+
+                        let imgPdfWidth = pdfWidth;
+                        let imgPdfHeight = (imgOriginalHeight * pdfWidth) / imgOriginalWidth;
+
+                        // 이미지가 PDF 높이를 초과하면 높이에 맞추고 너비 조절
+                        if (imgPdfHeight > pdfHeight) {
+                            imgPdfHeight = pdfHeight;
+                            imgPdfWidth = (imgOriginalWidth * pdfHeight) / imgOriginalHeight;
+                        }
+
+                        // 이미지를 PDF 중앙에 배치
+                        const xOffset = (pdfWidth - imgPdfWidth) / 2;
+                        const yOffset = (pdfHeight - imgPdfHeight) / 2;
+
+                        // Add image to PDF
+                        doc.addImage(base64data, 'JPEG', xOffset, yOffset, imgPdfWidth, imgPdfHeight);
+
+                        // Save the PDF
+                        doc.save(`${userName}_${selectedDate}_플로깅수료증.pdf`);
+                        showMessageBox("수료증이 PDF로 다운로드되었습니다!");
+                    };
+                    img.onerror = () => {
+                        showMessageBox("수료증 이미지 로드에 실패했습니다. 다시 시도해주세요.");
+                    };
+                    img.src = base64data; // Base64 데이터를 이미지 소스로 설정하여 로드
+                };
+
+                reader.onerror = () => {
+                    showMessageBox("이미지 데이터를 읽는 중 오류가 발생했습니다. 다시 시도해주세요.");
+                };
+
+            } catch (error) {
+                console.error("PDF 생성 중 오류 발생:", error);
+                showMessageBox("PDF 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
+            }
+        });
+
+        // '처음으로 돌아가기' 버튼 클릭 이벤트
+        resetBtn.addEventListener('click', () => {
+            certificateSection.classList.add('hidden');
+            explanationSection.classList.remove('hidden');
+            userNameInput.value = '';
+            ploggingDateSelect.value = '';
+        });
+    </script>
+</body>
+</html>
